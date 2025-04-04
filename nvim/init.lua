@@ -1,16 +1,15 @@
 -- ==========================
--- == БАЗОВЫЕ НАСТРОЙКИ  ==
+-- ==    BASIC SETTINGS    ==
 -- ==========================
 
-vim.cmd('syntax on')  -- Включаем синтаксис
+vim.cmd('syntax on') 
 vim.cmd([[
     filetype on
     filetype indent on
     filetype plugin on
 ]])
-vim.o.compatible = false  -- Отключаем Vi-режим
+vim.o.compatible = false
 
--- Настройки табов и отступов
 vim.o.tabstop = 8
 vim.o.shiftwidth = 8
 vim.o.softtabstop = 8
@@ -18,7 +17,7 @@ vim.o.smarttab = true
 vim.o.autoindent = true
 vim.o.smartindent = true
 
--- Улучшения UI
+
 vim.o.number = true
 vim.o.cursorline = true
 vim.o.cursorcolumn = true
@@ -32,27 +31,25 @@ vim.o.wildmenu = true
 vim.o.laststatus = 2
 vim.o.showtabline = 2
 
--- Цветовая схема Gruvbox (не ломается, если не установлен)
 pcall(vim.cmd, 'colorscheme gruvbox')
 
 -- ==========================
 -- == ГОРЯЧИЕ КЛАВИШИ     ==
 -- ==========================
 
-vim.keymap.set('n', '<leader>c', ':tabedit<Space>')  -- Открыть новую вкладку
-vim.keymap.set('n', '<leader>cc', ':set colorcolumn=80<CR>')  -- Включить colorcolumn
-vim.keymap.set('n', '<leader>ncc', ':set colorcolumn=0<CR>')  -- Выключить colorcolumn
+vim.keymap.set('n', '<leader>c', ':tabedit<Space>')  
+vim.keymap.set('n', '<leader>cc', ':set colorcolumn=80<CR>')
+vim.keymap.set('n', '<leader>ncc', ':set colorcolumn=0<CR>') 
 
 -- Буферы
-vim.keymap.set('n', '<leader>bn', ':bnext<CR>')  -- Следующий буфер
-vim.keymap.set('n', '<leader>bp', ':bprevious<CR>')  -- Предыдущий буфер
-vim.keymap.set('n', '<leader>bd', ':bdelete<CR>')  -- Закрыть буфер
+vim.keymap.set('n', '<leader>bn', ':bnext<CR>') 
+vim.keymap.set('n', '<leader>bp', ':bprevious<CR>') 
+vim.keymap.set('n', '<leader>bd', ':bdelete<CR>') 
 
 -- ==========================
 -- == УСТАНОВКА ПЛАГИНОВ  ==
 -- ==========================
 
--- Устанавливаем Lazy.nvim (если его нет)
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
     vim.fn.system({
@@ -62,17 +59,13 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
--- Подключаем плагины через Lazy.nvim
-require('lazy').setup({
-    -- Файловый менеджер (замена Netrw)
-    {
-        'nvim-tree/nvim-tree.lua',
-        dependencies = { 'nvim-tree/nvim-web-devicons' }
-    },
-
-    -- Цветовая схема Gruvbox
-    'morhetz/gruvbox',
-    {
+require("lazy").setup({
+  {
+    'nvim-tree/nvim-tree.lua',
+    dependencies = { 'nvim-tree/nvim-web-devicons' }
+  },
+  'morhetz/gruvbox',
+  {
     "akinsho/toggleterm.nvim",
     version = "*",
     config = function()
@@ -82,7 +75,43 @@ require('lazy').setup({
         direction = 'horizontal',
       })
     end,
-   },
+  },
+  { "goerz/jupytext.vim" },
+  {
+    "hkupty/iron.nvim",
+    config = function()
+      local iron = require("iron.core")
+      iron.setup {
+        config = {
+          scratch_repl = true,
+          repl_definition = {
+            python = {command = {"ipython"}},
+	    ipynb = {command = { "jupyter", "console", "--existing" }},
+	    markdown = {command = {"ipython"}},
+          },
+          repl_open_cmd = require("iron.view").split.vertical.botright()
+        },
+        keymaps = {
+          send_motion = "<space>sc",
+          visual_send = "<space>sc",
+          send_file = "<space>sf",
+          send_line = "<space>sl",
+          send_mark = "<space>sm",
+          mark_motion = "<space>mc",
+          mark_visual = "<space>mc",
+          remove_mark = "<space>md",
+          cr = "<space>s<cr>",
+          interrupt = "<space>s<space>",
+          exit = "<space>sq",
+          clear = "<space>cl",
+        },
+        highlight = {
+          italic = true
+        },
+        ignore_blank_lines = true,
+      }
+    end
+  }
 })
 
 -- ==========================
@@ -112,28 +141,22 @@ require("nvim-tree").setup({
 -- == НАСТРОЙКА ТЕРМИНАЛА  ==
 -- ==========================
 require("toggleterm").setup({
-    size = 15,               -- Высота терминала (в строках)
-    open_mapping = [[<C-\>]], -- Горячая клавиша для открытия/закрытия
-    direction = 'horizontal', -- 'vertical' | 'horizontal' | 'float'
-    shade_terminals = true,   -- Затемнение основного окна
-    persist_size = true,      -- Запоминать размер
-    close_on_exit = true,     -- Закрывать терминал при выходе
-    shell = vim.o.shell,      -- Использовать системную оболочку (bash/zsh)
-})
-
--- Горячие клавиши для терминала
-vim.keymap.set('n', '<leader>tt', '<Cmd>ToggleTerm<CR>', { noremap = true, silent = true })
-vim.keymap.set('t', '<Esc>', '<C-\\><C-n>', { noremap = true }) -- Выход из терминала в нормальный режим
-vim.cmd([[autocmd VimEnter * ToggleTerm]])
-
-require("toggleterm").setup({
+    size = 15,               
+    open_mapping = [[<C-\>]], 
+    direction = 'horizontal', 
+    shade_terminals = true,   
+    persist_size = true,      
+    close_on_exit = true,     
+    shell = vim.o.shell,
     on_open = function(term)
-        vim.cmd("startinsert!")  -- Автоматически войти в режим ввода
+        vim.cmd("startinsert!")
         vim.api.nvim_buf_set_keymap(term.bufnr, 't', '<Esc>', [[<C-\><C-n>]], {noremap = true})
     end,
 })
 
--- Горячие клавиши для NvimTree
+vim.keymap.set('n', '<leader>tt', '<Cmd>ToggleTerm<CR>', { noremap = true, silent = true })
+vim.keymap.set('t', '<Esc>', '<C-\\><C-n>', { noremap = true })
+vim.cmd([[autocmd VimEnter * ToggleTerm]])
 vim.keymap.set('n', '<C-n>', ':NvimTreeToggle<CR>', { noremap = true, silent = true })
 vim.keymap.set('n', '<leader>r', ':NvimTreeRefresh<CR>', { noremap = true, silent = true })
 vim.keymap.set('n', '<leader>n', ':NvimTreeFindFile<CR>', { noremap = true, silent = true })
