@@ -2,6 +2,7 @@
 -- ==    BASIC SETTINGS    ==
 -- ==========================
 
+require("kitty_colors").apply()
 vim.cmd('syntax on') 
 vim.cmd([[
     filetype on
@@ -31,7 +32,7 @@ vim.o.wildmenu = true
 vim.o.laststatus = 2
 vim.o.showtabline = 2
 
-pcall(vim.cmd, 'colorscheme gruvbox')
+--pcall(vim.cmd, 'colorscheme gruvbox')
 
 -- ==========================
 -- == ГОРЯЧИЕ КЛАВИШИ     ==
@@ -156,8 +157,9 @@ require("toggleterm").setup({
 
 vim.keymap.set('n', '<leader>tt', '<Cmd>ToggleTerm<CR>', { noremap = true, silent = true })
 vim.keymap.set('t', '<Esc>', '<C-\\><C-n>', { noremap = true })
-vim.cmd([[autocmd VimEnter * ToggleTerm]])
+-- vim.cmd([[autocmd VimEnter * ToggleTerm]])
 vim.keymap.set('n', '<C-n>', ':NvimTreeToggle<CR>', { noremap = true, silent = true })
 vim.keymap.set('n', '<leader>r', ':NvimTreeRefresh<CR>', { noremap = true, silent = true })
 vim.keymap.set('n', '<leader>n', ':NvimTreeFindFile<CR>', { noremap = true, silent = true })
 
+vim.opt.clipboard = "unnamedplus"
