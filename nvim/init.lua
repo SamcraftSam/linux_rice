@@ -21,7 +21,7 @@ vim.o.smartindent = true
 
 vim.o.number = true
 vim.o.cursorline = true
-vim.o.cursorcolumn = true
+vim.o.cursorcolumn = false
 vim.o.incsearch = true
 vim.o.hlsearch = true
 vim.o.ignorecase = true
@@ -37,6 +37,7 @@ vim.o.showtabline = 2
 -- ==========================
 -- == ГОРЯЧИЕ КЛАВИШИ     ==
 -- ==========================
+vim.g.mapleader = " "
 
 vim.keymap.set('n', '<leader>c', ':tabedit<Space>')  
 vim.keymap.set('n', '<leader>cc', ':set colorcolumn=80<CR>')
@@ -112,7 +113,52 @@ require("lazy").setup({
         ignore_blank_lines = true,
       }
     end
-  }
+  },
+  {
+    "MIBismuth/matlab.nvim",
+    config = function()
+        require('matlab').setup({
+            matlab_dir = "/home/alex/Apps/matlab/bin/matlab"
+        })
+    end,
+  },
+
+    -- Mason: installs external tools (LSP servers)
+    { 
+      "williamboman/mason.nvim", config = true 
+    },
+
+    -- Mason-LSPConfig: links Mason-installed servers to lspconfig
+    {
+      "williamboman/mason-lspconfig.nvim",
+      dependencies = { "williamboman/mason.nvim" },
+      config = function()
+        require("mason").setup()
+        require("mason-lspconfig").setup({
+          ensure_installed = { "lua_ls", "pyright","clangd" },
+        })
+      end,
+    },
+
+    -- nvim-lspconfig: actual LSP client setup
+    {
+      "neovim/nvim-lspconfig",
+      dependencies = { "williamboman/mason-lspconfig.nvim" },
+      config = function()
+        local lspconfig = require("lspconfig")
+        for _, server in ipairs({ "lua_ls","pyright","clangd" }) do
+          lspconfig[server].setup({})
+        end
+      end,
+    },
+    {
+      "rmagatti/goto-preview",
+      dependencies = { "rmagatti/logger.nvim" },
+      event = "BufEnter",
+      config = true, -- necessary as per https://github.com/rmagatti/goto-preview/issues/88
+    },
+{ "nvim-telescope/telescope.nvim", dependencies = "tsakirist/telescope-lazy.nvim" }
+  
 })
 
 -- ==========================
@@ -137,6 +183,116 @@ require("nvim-tree").setup({
         enable = true,
     },
 })
+
+-- ===================
+-- == LSP AND STUFF ==
+-- ===================
+require('goto-preview').setup {
+  width = 120, -- Width of the floating window
+  height = 15, -- Height of the floating window
+  border = {"↖", "─" ,"┐", "│", "┘", "─", "└", "│"}, -- Border characters of the floating window
+  default_mappings = false, -- Bind default mappings
+  debug = false, -- Print debug information
+  opacity = nil, -- 0-100 opacity level of the floating window where 100 is fully transparent.
+  resizing_mappings = false, -- Binds arrow keys to resizing the floating window.
+  post_open_hook = nil, -- A function taking two arguments, a buffer and a window to be ran as a hook.
+  post_close_hook = nil, -- A function taking two arguments, a buffer and a window to be ran as a hook.
+  references = { -- Configure the telescope UI for slowing the references cycling window.
+    provider = "telescope", -- telescope|fzf_lua|snacks|mini_pick|default
+    telescope = require("telescope.themes").get_dropdown({ hide_preview = false })
+  },
+  -- These two configs can also be passed down to the goto-preview definition and implementation calls for one off "peak" functionality.
+  focus_on_open = true, -- Focus the floating window when opening it.
+  dismiss_on_move = false, -- Dismiss the floating window when moving the cursor.
+  force_close = true, -- passed into vim.api.nvim_win_close's second argument. See :h nvim_win_close
+  bufhidden = "wipe", -- the bufhidden option to set on the floating window. See :h bufhidden
+  stack_floating_preview_windows = true, -- Whether to nest floating windows
+  same_file_float_preview = true, -- Whether to open a new floating window for a reference within the current file
+  preview_window_title = { enable = true, position = "left" }, -- Whether to set the preview window title as the filename
+  zindex = 1, -- Starting zindex for the stack of floating windows
+  vim_ui_input = true, -- Whether to override vim.ui.input with a goto-preview floating window
+ 
+}
+
+
+-- init.lua or plugin setup file
+require('goto-preview').setup {}
+
+-- Keybinding example: Preview definition with <leader>pd
+vim.api.nvim_set_keymap(
+  'n',                             -- normal mode
+  '<leader>gd',                    -- your keybinding
+  "<cmd>lua require('goto-preview').goto_preview_definition()<CR>",
+  { noremap = true, silent = true } -- don't remap, no echo
+)
+
+-- Optional: Preview implementation, references, etc.
+vim.api.nvim_set_keymap('n', '<leader>gi', "<cmd>lua require('goto-preview').goto_preview_implementation()<CR>", { noremap=true, silent=true })
+vim.api.nvim_set_keymap('n', '<leader>gr', "<cmd>lua require('goto-preview').goto_preview_references()<CR>", { noremap=true, silent=true })
+vim.api.nvim_set_keymap('n', '<leader>gq', "<cmd>lua require('goto-preview').close_all_win()<CR>", { noremap=true, silent=true })
+
+--- ===============
+--- == TELESCOPE ==
+--- ===============
+
+require("telescope").setup({
+  extensions = {
+    -- Type information can be loaded via 'https://github.com/folke/lazydev.nvim'
+    -- by adding the below two annotations:
+    ---@module "telescope._extensions.lazy"
+    ---@type TelescopeLazy.Config
+    lazy = {
+      -- Optional theme (the extension doesn't set a default theme)
+      theme = "ivy",
+      -- The below configuration options are the defaults
+      show_icon = true,
+      mappings = {
+        open_in_browser = "<C-o>",
+        open_in_file_browser = "<M-b>",
+        open_in_find_files = "<C-f>",
+        open_in_live_grep = "<C-g>",
+        open_in_terminal = "<C-t>",
+        open_plugins_picker = "<C-b>",
+        open_lazy_root_find_files = "<C-r>f",
+        open_lazy_root_live_grep = "<C-r>g",
+        change_cwd_to_plugin = "<C-c>d",
+      },
+      actions_opts = {
+        open_in_browser = {
+          auto_close = false,
+        },
+        change_cwd_to_plugin = {
+          auto_close = false,
+        },
+      },
+      terminal_opts = {
+        relative = "editor",
+        style = "minimal",
+        border = "rounded",
+        title = "Telescope lazy",
+        title_pos = "center",
+        width = 0.5,
+        height = 0.5,
+      },
+      -- Other telescope configuration options
+    },
+  },
+})
+
+require("telescope").load_extension("lazy")
+
+-- ====================
+-- == MATLAB KEYMAPS ==
+-- ====================
+
+vim.api.nvim_set_keymap('n', '<leader>mo', ':MatlabCliOpen<CR>', {})
+vim.api.nvim_set_keymap('n', '<leader>mc', ':MatlabCliCancelOperation<CR>', {})
+vim.api.nvim_set_keymap('n', '<leader>mh', ':MatlabHelp<CR>', {})
+vim.api.nvim_set_keymap('n', '<leader>md', ':MatlabDoc<CR>', {})
+vim.api.nvim_set_keymap('n', '<leader>me', ':MatlabOpenEditor<CR>', {})
+vim.api.nvim_set_keymap('v', '<leader>mr', ':<C-u>execute "MatlabCliRunSelection"<CR>', {})
+vim.api.nvim_set_keymap('n', '<leader>mw', ':MatlabOpenWorkspace<CR>', {})
+vim.api.nvim_set_keymap('n', '<leader><CR>', ':MatlabCliRunCell<CR>', {})
 
 -- ==========================
 -- == НАСТРОЙКА ТЕРМИНАЛА  ==
