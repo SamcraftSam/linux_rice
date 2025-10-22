@@ -11,16 +11,18 @@ vim.cmd([[
 ]])
 vim.o.compatible = false
 
-vim.o.tabstop = 8
-vim.o.shiftwidth = 8
-vim.o.softtabstop = 8
+vim.opt.tabstop = 4        -- Number of visual spaces per TAB
+vim.opt.shiftwidth = 4      -- Number of spaces to use for (auto)indent
+vim.opt.expandtab = true     -- Convert tabs to spaces
+
+vim.o.softtabstop = 4
 vim.o.smarttab = true
 vim.o.autoindent = true
 vim.o.smartindent = true
 
 
 vim.o.number = true
-vim.o.cursorline = true
+vim.o.cursorline = false
 vim.o.cursorcolumn = false
 vim.o.incsearch = true
 vim.o.hlsearch = true
@@ -34,22 +36,24 @@ vim.o.showtabline = 2
 
 --pcall(vim.cmd, 'colorscheme gruvbox')
 
--- ==========================
--- == ГОРЯЧИЕ КЛАВИШИ     ==
--- ==========================
+-- ==============
+-- == HOT KEYS ==
+-- ==============
 vim.g.mapleader = " "
 
 vim.keymap.set('n', '<leader>c', ':tabedit<Space>')  
 vim.keymap.set('n', '<leader>cc', ':set colorcolumn=80<CR>')
 vim.keymap.set('n', '<leader>ncc', ':set colorcolumn=0<CR>') 
 
--- Буферы
+-- Buffers
+vim.opt.clipboard = "unnamedplus"
+
 vim.keymap.set('n', '<leader>bn', ':bnext<CR>') 
 vim.keymap.set('n', '<leader>bp', ':bprevious<CR>') 
 vim.keymap.set('n', '<leader>bd', ':bdelete<CR>') 
 
 -- ==========================
--- == УСТАНОВКА ПЛАГИНОВ  ==
+-- == PLAGIN INSTALLATION  ==
 -- ==========================
 
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
@@ -77,42 +81,6 @@ require("lazy").setup({
         direction = 'horizontal',
       })
     end,
-  },
-  { "goerz/jupytext.vim" },
-  {
-    "hkupty/iron.nvim",
-    config = function()
-      local iron = require("iron.core")
-      iron.setup {
-        config = {
-          scratch_repl = true,
-          repl_definition = {
-            python = {command = {"ipython"}},
-	    ipynb = {command = { "jupyter", "console", "--existing" }},
-	    markdown = {command = {"ipython"}},
-          },
-          repl_open_cmd = require("iron.view").split.vertical.botright()
-        },
-        keymaps = {
-          send_motion = "<space>sc",
-          visual_send = "<space>sc",
-          send_file = "<space>sf",
-          send_line = "<space>sl",
-          send_mark = "<space>sm",
-          mark_motion = "<space>mc",
-          mark_visual = "<space>mc",
-          remove_mark = "<space>md",
-          cr = "<space>s<cr>",
-          interrupt = "<space>s<space>",
-          exit = "<space>sq",
-          clear = "<space>cl",
-        },
-        highlight = {
-          italic = true
-        },
-        ignore_blank_lines = true,
-      }
-    end
   },
   {
     "MIBismuth/matlab.nvim",
@@ -161,9 +129,9 @@ require("lazy").setup({
   
 })
 
--- ==========================
--- == НАСТРОЙКА NVIM-TREE  ==
--- ==========================
+-- =====================
+-- == NVIM-TREE SETUP ==
+-- =====================
 
 require("nvim-tree").setup({
     view = {
@@ -226,10 +194,18 @@ vim.api.nvim_set_keymap(
   { noremap = true, silent = true } -- don't remap, no echo
 )
 
+vim.keymap.set("n", "gs", function()
+    require("telescope.builtin").lsp_definitions()
+    end, { noremap = true, silent = true })
+
+--vim.api.nvim_set_keymap("n", "gd", "<cmd>lua require('goto-preview').goto_preview_declaration()<CR>", { noremap = true, silent = true })
+
 -- Optional: Preview implementation, references, etc.
 vim.api.nvim_set_keymap('n', '<leader>gi', "<cmd>lua require('goto-preview').goto_preview_implementation()<CR>", { noremap=true, silent=true })
 vim.api.nvim_set_keymap('n', '<leader>gr', "<cmd>lua require('goto-preview').goto_preview_references()<CR>", { noremap=true, silent=true })
 vim.api.nvim_set_keymap('n', '<leader>gq', "<cmd>lua require('goto-preview').close_all_win()<CR>", { noremap=true, silent=true })
+
+vim.diagnostic.enable(false)
 
 --- ===============
 --- == TELESCOPE ==
@@ -294,12 +270,15 @@ vim.api.nvim_set_keymap('v', '<leader>mr', ':<C-u>execute "MatlabCliRunSelection
 vim.api.nvim_set_keymap('n', '<leader>mw', ':MatlabOpenWorkspace<CR>', {})
 vim.api.nvim_set_keymap('n', '<leader><CR>', ':MatlabCliRunCell<CR>', {})
 
--- ==========================
--- == НАСТРОЙКА ТЕРМИНАЛА  ==
--- ==========================
-require("toggleterm").setup({
+-- ===============
+-- == CLI SETUP ==
+-- ===============
+local Terminal  = require('toggleterm.terminal').Terminal
+
+--require("toggleterm").setup({
+local main_term = Terminal:new({
     size = 15,               
-    open_mapping = [[<C-\>]], 
+    --open_mapping = [[<C-\>]], 
     direction = 'horizontal', 
     shade_terminals = true,   
     persist_size = true,      
@@ -309,6 +288,7 @@ require("toggleterm").setup({
         vim.cmd("startinsert!")
         vim.api.nvim_buf_set_keymap(term.bufnr, 't', '<Esc>', [[<C-\><C-n>]], {noremap = true})
     end,
+
 })
 
 vim.keymap.set('n', '<leader>tt', '<Cmd>ToggleTerm<CR>', { noremap = true, silent = true })
@@ -318,4 +298,29 @@ vim.keymap.set('n', '<C-n>', ':NvimTreeToggle<CR>', { noremap = true, silent = t
 vim.keymap.set('n', '<leader>r', ':NvimTreeRefresh<CR>', { noremap = true, silent = true })
 vim.keymap.set('n', '<leader>n', ':NvimTreeFindFile<CR>', { noremap = true, silent = true })
 
-vim.opt.clipboard = "unnamedplus"
+-- ===================
+-- == ESP-IDF SETUP ==
+-- ===================
+
+-- change this path to where your esp-idf export.sh lives
+local idf_export = os.getenv("HOME") .. "/esp/v5.4/esp-idf/export.sh"
+
+-- custom terminal that sources IDF venv
+local idf_term = Terminal:new({
+  id = 1,
+  size = 15,                
+  cmd = "bash -c 'source " .. idf_export .. " && exec bash'",
+  hidden = true,
+  direction = "horizontal",
+  shade_terminals = true,   
+  persist_size = true,      
+  close_on_exit = true,     
+  shell = vim.o.shell,
+})
+
+function _IDF_TOGGLE()
+  idf_term:toggle()
+end
+
+-- Keybind: open ESP-IDF terminal
+vim.keymap.set('n', '<leader>te', _IDF_TOGGLE, { noremap = true, silent = true })
