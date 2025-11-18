@@ -1,0 +1,21 @@
+# BEGIN_KITTY_THEME
+# Cyberpunk
+include current-theme.conf
+# END_KITTY_THEME
+
+# Font and appearance
+font_family      FiraCode Nerd Font
+font_size        9.0
+cursor_shape     block
+#background_opacity 0.92
+
+# Tabs
+tab_bar_edge top
+active_tab_font_style bold-italic
+
+# Enable mouse reporting
+mouse_hide_wait  3.0
+
+allow_remote_control yes
+listen_on unix:/tmp/mykitty
+
