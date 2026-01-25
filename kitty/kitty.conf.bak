@@ -1,5 +1,5 @@
 # BEGIN_KITTY_THEME
-# Cyberpunk
+# Base2Tone Suburb Dark
 include current-theme.conf
 # END_KITTY_THEME
 
@@ -19,3 +19,4 @@ mouse_hide_wait  3.0
 allow_remote_control yes
 listen_on unix:/tmp/mykitty
 
+enable_audio_bell no

@@ -113,10 +113,13 @@ require("lazy").setup({
       "neovim/nvim-lspconfig",
       dependencies = { "williamboman/mason-lspconfig.nvim" },
       config = function()
-        local lspconfig = require("lspconfig")
-        for _, server in ipairs({ "lua_ls","pyright","clangd" }) do
-          lspconfig[server].setup({})
-        end
+     -- local lsp = vim.lsp.config or vim.lsp._server_configurations
+        vim.lsp.config('clangd', {filetypes = {'c', 'cpp'}})
+	 -- for _, server in ipairs({ "lua_ls","pyright","clangd" }) do
+     -- local lsp = require("lspconfig")
+        vim.lsp.enable("clangd")
+	    --lsp.pyright.setup {}
+	    --lsp.clangd.setup {}
       end,
     },
     {
@@ -206,6 +209,22 @@ vim.api.nvim_set_keymap('n', '<leader>gr', "<cmd>lua require('goto-preview').got
 vim.api.nvim_set_keymap('n', '<leader>gq', "<cmd>lua require('goto-preview').close_all_win()<CR>", { noremap=true, silent=true })
 
 vim.diagnostic.enable(false)
+
+
+
+vim.lsp.config("clangd", {
+    cmd = {
+        "clangd",
+        "--background-index",
+        "--clang-tidy",
+        "--completion-style=detailed",
+        "--header-insertion=never",
+    },
+    filetypes = { "c", "cpp" },
+})
+
+-- actually enable it
+vim.lsp.enable("clangd")
 
 --- ===============
 --- == TELESCOPE ==
