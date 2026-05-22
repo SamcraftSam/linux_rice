@@ -11,5 +11,5 @@ command -v pip3 install --user ipython jupytext
 [ -d ~/.config/nvim ] || mkdir -p ~/.config/nvim
 [ -d ~/.local/share/nvim/lazy/lazy.nvim ] || git clone https://github.com/folke/lazy.nvim ~/.local/share/nvim/lazy/lazy.nvim
 cp "$(dirname "$0")/nvim/init.lua" ~/.config/nvim/init.lua
-
+cp -r "$(dirname "$0")/nvim/lua/" ~/.config/nvim/lua/
 echo "COMPLETED!"
