@@ -20,7 +20,6 @@ vim.o.smarttab = true
 vim.o.autoindent = true
 vim.o.smartindent = true
 
-
 vim.o.number = true
 vim.o.cursorline = false
 vim.o.cursorcolumn = false
@@ -33,8 +32,6 @@ vim.o.history = 100
 vim.o.wildmenu = true
 vim.o.laststatus = 2
 vim.o.showtabline = 2
-
---pcall(vim.cmd, 'colorscheme gruvbox')
 
 -- ==============
 -- == HOT KEYS ==
@@ -343,3 +340,17 @@ end
 
 -- Keybind: open ESP-IDF terminal
 vim.keymap.set('n', '<leader>te', _IDF_TOGGLE, { noremap = true, silent = true })
+
+
+-- =========
+-- == ADA ==
+-- =========
+vim.api.nvim_create_autocmd("FileType", {
+    pattern = "ada",
+    callback = function()
+        vim.opt_local.expandtab = true
+        vim.opt_local.shiftwidth = 3
+        vim.opt_local.tabstop = 3
+        vim.opt_local.softtabstop = 3
+    end,
+})
